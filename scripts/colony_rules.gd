@@ -35,10 +35,15 @@ func extractors() -> int:
 func defense() -> int:
 	return buildings.values().count(Building.TURRET)
 
+func predicted_damage() -> int:
+	if wave >= WAVES.size():
+		return 0
+	return maxi(0, WAVES[wave] - defense())
+
 func end_day() -> int:
 	if phase != Phase.PLAYING:
 		return 0
-	var damage := maxi(0, WAVES[wave] - defense())
+	var damage := predicted_damage()
 	health = maxi(0, health - damage)
 	metal += 1 + 2 * extractors()
 	wave += 1

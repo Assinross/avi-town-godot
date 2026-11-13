@@ -28,7 +28,7 @@ func play_raid(damage: int) -> void:
 
 func _process(delta: float) -> void:
 	if pulse > 0.0:
-		pulse = maxf(0.0, pulse - delta * 1.5)
+		pulse = maxf(0.0, pulse - delta * 0.62)
 		queue_redraw()
 
 func _draw() -> void:
@@ -53,10 +53,41 @@ func _draw() -> void:
 			if x >= 0 and x < Rules.SIZE:
 				draw_building(Vector2i(x, y))
 	if pulse > 0.0:
-		var at := center(Rules.HQ) - Vector2(0, 31)
-		var tint := Color("#ff927d") if impact else Color("#72f3df")
-		tint.a = pulse
-		draw_arc(at, 16 + 44 * (1.0 - pulse), 0, TAU, 40, tint, 2.5, true)
+		draw_raid()
+
+func draw_raid() -> void:
+	var progress := 1.0 - pulse
+	var target := center(Rules.HQ)
+	var ship := target + Vector2(lerpf(-175.0, 190.0, progress), -132.0 + sin(progress * PI) * 32.0)
+	var firing := progress > 0.28 and progress < 0.74
+	if firing and impact:
+		var flash := 0.65 + 0.35 * sin(progress * 85.0)
+		face([ship + Vector2(-9, 4), ship + Vector2(9, 4), target + Vector2(21, 4),
+			target + Vector2(-21, 4)], Color(1.0, 0.24, 0.18, flash * 0.34))
+		draw_line(ship, target - Vector2(0, 15), Color(1.0, 0.52, 0.38, flash), 2, true)
+		draw_arc(target, 13 + fmod(progress * 95.0, 19), 0, TAU, 32,
+			Color(1.0, 0.63, 0.38, flash * 0.8), 2, true)
+	if firing:
+		for cell in rules.buildings:
+			if rules.buildings[cell] == Rules.Building.TURRET:
+				var muzzle := center(cell) + Vector2(21, -49)
+				var shot := fmod(progress * 8.0 + cell.x * 0.19, 1.0)
+				draw_line(muzzle.lerp(ship, shot), muzzle.lerp(ship, minf(1.0, shot + 0.12)),
+					Color("#a7ffee"), 2, true)
+	draw_oval(ship + Vector2(0, 4), Vector2(40, 13), Color("#292631"))
+	draw_oval(ship, Vector2(40, 11), Color("#5d5966"))
+	draw_oval(ship - Vector2(0, 7), Vector2(21, 10), Color("#777784"))
+	draw_line(ship + Vector2(-33, 3), ship + Vector2(33, 3), Color("#aaa0a7"), 1, true)
+	for i in range(5):
+		var light := ship + Vector2((i - 2) * 12, 6 + (2 - absi(i - 2)))
+		draw_circle(light, 2, Color("#ffad77"), true, -1, true)
+
+func draw_oval(point: Vector2, radius: Vector2, color: Color) -> void:
+	var outline := PackedVector2Array()
+	for i in range(32):
+		var angle := TAU * i / 32.0
+		outline.append(point + Vector2(cos(angle), sin(angle)) * radius)
+	draw_colored_polygon(outline, color)
 
 func draw_landscape() -> void:
 	for i in range(32):

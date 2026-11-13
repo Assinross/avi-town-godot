@@ -39,7 +39,7 @@ func _ready() -> void:
 	add_label(menu, "Переживи три налёта НЛО", 16, "#b9b9cd")
 	hud = add_label(menu, "", 18, "#efe2cd")
 	hud.add_theme_stylebox_override("normal", surface("#141a27", "#363e52"))
-	hud.custom_minimum_size.y = 89
+	hud.custom_minimum_size.y = 104
 	hud.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	extractor = add_button(menu, "", func(): select(Rules.Building.EXTRACTOR))
 	turret = add_button(menu, "", func(): select(Rules.Building.TURRET))
@@ -137,8 +137,9 @@ func end_day() -> void:
 
 func refresh() -> void:
 	var strength := "—" if rules.wave == Rules.WAVES.size() else str(Rules.WAVES[rules.wave])
-	hud.text = "Металл  %d    Штаб  %d / 5\nНалёты  %d / 3    Урон  %s\nЗащита  %d    Доход  +%d" % [
-		rules.metal, rules.health, rules.wave, strength, rules.defense(), 1 + 2 * rules.extractors()]
+	hud.text = "Металл  %d    Штаб  %d / 5\nНалёты  %d / 3    Сила  %s\nЗащита  %d    Доход  +%d\nПрогноз урона штабу  %s" % [
+		rules.metal, rules.health, rules.wave, strength, rules.defense(), 1 + 2 * rules.extractors(),
+		"—" if strength == "—" else str(rules.predicted_damage())]
 	var playing := rules.phase == Rules.Phase.PLAYING
 	extractor.disabled = not playing
 	turret.disabled = not playing
