@@ -1,0 +1,15 @@
+config_version=5
+
+[application]
+config/name="Avi Town"
+run/main_scene="res://scenes/colony.tscn"
+config/features=PackedStringArray("4.6", "GL Compatibility")
+
+[display]
+window/size/viewport_width=1024
+window/size/viewport_height=640
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.05, 0.09, 0.10, 1)
