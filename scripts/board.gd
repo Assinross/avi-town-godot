@@ -97,6 +97,9 @@ func draw_tile(cell: Vector2i) -> void:
 	draw_colored_polygon(outline, color.lightened(0.22) if active else color)
 	outline.append(outline[0])
 	draw_polyline(outline, Color("#ffe0a6") if active else Color("#775044"), 2.0 if active else 1.0, true)
+	if Rules.is_road(cell):
+		draw_road(point, cell.x == Rules.HQ.x)
+		return
 	if cell == Rules.HQ or rules.buildings.has(cell):
 		return
 	for i in range(4):
@@ -110,13 +113,23 @@ func draw_tile(cell: Vector2i) -> void:
 func draw_building(cell: Vector2i) -> void:
 	var point := center(cell)
 	if cell == Rules.HQ:
-		block(point, Vector2(27, 13), 31, Color("#8c9d9a"))
-		block(point - Vector2(0, 31), Vector2(18, 9), 11, Color("#b3c7bd"))
-		draw_line(point + Vector2(4, -44), point + Vector2(4, -65), Color("#d6d1b3"), 2, true)
-		draw_circle(point + Vector2(4, -65), 3, Color("#ffcf87"), true, -1, true)
-		for i in range(3):
-			draw_line(point + Vector2(-15 + i * 7, -23 + i * 3),
-				point + Vector2(-11 + i * 7, -21 + i * 3), Color("#84f2d8"), 2, true)
+		block(point, Vector2(30, 15), 7, Color("#766e5e"))
+		block(point - Vector2(0, 6), Vector2(26, 13), 20, Color("#797b62"))
+		block(point - Vector2(0, 26), Vector2(20, 10), 6, Color("#a9a092"))
+		face([point + Vector2(4, -13), point + Vector2(19, -20),
+			point + Vector2(19, -6), point + Vector2(4, 1)], Color("#34333b"))
+		draw_line(point + Vector2(5, -14), point + Vector2(18, -20), Color("#ffc87e"), 3, true)
+		draw_line(point + Vector2(-9, -30), point + Vector2(-2, -49), Color("#35363e"), 4, true)
+		draw_line(point + Vector2(8, -30), point + Vector2(-2, -49), Color("#35363e"), 4, true)
+		var dish := PackedVector2Array()
+		for i in range(24):
+			var angle := TAU * i / 24.0
+			dish.append(point + Vector2(-4, -51) + Vector2(cos(angle) * 17, sin(angle) * 8).rotated(0.56))
+		draw_colored_polygon(dish, Color("#d4c9bc"))
+		dish.append(dish[0])
+		draw_polyline(dish, Color("#fff0dc"), 1.4, true)
+		draw_line(point + Vector2(-4, -51), point + Vector2(-14, -64), Color("#575661"), 2, true)
+		draw_circle(point + Vector2(-14, -64), 2, Color("#ffe0a0"), true, -1, true)
 	elif rules.buildings.get(cell) == Rules.Building.EXTRACTOR:
 		block(point, Vector2(23, 11), 10, Color("#867b70"))
 		block(point + Vector2(-6, -12), Vector2(12, 6), 17, Color("#e8ae68"))
@@ -124,11 +137,33 @@ func draw_building(cell: Vector2i) -> void:
 		draw_line(point + Vector2(-5, -29), point + Vector2(11, -21), Color("#f9d39a"), 3, true)
 		draw_line(point + Vector2(11, -21), point + Vector2(11, -10), Color("#463a46"), 2, true)
 	elif rules.buildings.get(cell) == Rules.Building.TURRET:
-		block(point, Vector2(24, 12), 10, Color("#747987"))
-		block(point - Vector2(0, 11), Vector2(14, 7), 15, Color("#73bdb4"))
-		draw_line(point + Vector2(3, -26), point + Vector2(22, -38), Color("#344c55"), 8, true)
-		draw_line(point + Vector2(3, -28), point + Vector2(22, -40), Color("#a9e7d8"), 3, true)
-		draw_circle(point + Vector2(-4, -25), 3, Color("#c1ffee"), true, -1, true)
+		block(point, Vector2(27, 13), 10, Color("#9b9188"))
+		block(point - Vector2(0, 10), Vector2(19, 9), 8, Color("#505461"))
+		draw_line(point + Vector2(-13, -13), point + Vector2(-3, -8), Color("#50e2dc"), 2, true)
+		block(point - Vector2(0, 17), Vector2(12, 6), 15, Color("#545865"))
+		for offset in [-5, 5]:
+			var mount := point + Vector2(offset, -29)
+			var muzzle := mount + Vector2(21, -21)
+			draw_line(mount, muzzle, Color("#252a37"), 7, true)
+			draw_line(mount - Vector2(0, 2), muzzle - Vector2(0, 2), Color("#b4b5bd"), 2, true)
+			draw_line(mount, mount.lerp(muzzle, 0.37), Color("#52dcd6"), 2, true)
+
+func draw_road(point: Vector2, crossing: bool) -> void:
+	face([road_point(point, -0.5, -0.37), road_point(point, 0.5, -0.37),
+		road_point(point, 0.5, 0.37), road_point(point, -0.5, 0.37)], Color("#b3a698"))
+	face([road_point(point, -0.5, -0.29), road_point(point, 0.5, -0.29),
+		road_point(point, 0.5, 0.29), road_point(point, -0.5, 0.29)], Color("#43424b"))
+	if crossing:
+		for i in range(5):
+			var across := -0.23 + i * 0.10
+			draw_line(road_point(point, -0.17, across), road_point(point, 0.17, across),
+				Color("#f8dfa8"), 2, true)
+	else:
+		draw_line(road_point(point, -0.23, 0), road_point(point, 0.23, 0),
+			Color("#e7ba68"), 1.5, true)
+
+func road_point(point: Vector2, along: float, across: float) -> Vector2:
+	return point + Vector2((along - across) * HALF.x, (along + across) * HALF.y)
 
 func block(point: Vector2, half_size: Vector2, height: float, color: Color) -> void:
 	var floor_points := diamond(point, half_size)

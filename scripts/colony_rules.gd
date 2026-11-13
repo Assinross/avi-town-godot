@@ -5,6 +5,7 @@ enum Building { EXTRACTOR, TURRET }
 
 const SIZE := 8
 const HQ := Vector2i(3, 3)
+const ROAD_ROW := 4
 const COSTS := [2, 3]
 const WAVES := [1, 3, 5]
 
@@ -14,9 +15,12 @@ var health := 5
 var wave := 0
 var buildings: Dictionary[Vector2i, Building] = {}
 
+static func is_road(cell: Vector2i) -> bool:
+	return cell.y == ROAD_ROW and cell.x >= 0 and cell.x < SIZE
+
 func can_build(cell: Vector2i, kind: Building) -> bool:
 	return phase == Phase.PLAYING and Rect2i(0, 0, SIZE, SIZE).has_point(cell) \
-		and cell != HQ and not buildings.has(cell) and metal >= COSTS[kind]
+		and cell != HQ and not is_road(cell) and not buildings.has(cell) and metal >= COSTS[kind]
 
 func build(cell: Vector2i, kind: Building) -> bool:
 	if not can_build(cell, kind):

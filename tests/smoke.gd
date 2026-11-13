@@ -32,6 +32,8 @@ func run() -> void:
 	check(colony.board.cell_at(colony.board.center(Vector2i(7, 0))) == Vector2i(7, 0), "Board coordinates should round-trip")
 	click_cell(colony, Rules.HQ)
 	check(colony.rules.metal == 5, "Building on HQ should be blocked")
+	click_cell(colony, Vector2i(Rules.HQ.x, Rules.ROAD_ROW))
+	check(colony.rules.buildings.is_empty() and colony.rules.metal == 5, "Road should block construction without charging metal")
 	click_cell(colony, Vector2i(0, 0))
 	check(colony.rules.extractors() == 1 and colony.rules.metal == 3, "Click should build an extractor")
 	colony.turret.pressed.emit()

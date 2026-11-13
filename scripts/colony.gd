@@ -168,6 +168,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if rules.build(cell, selected):
 			status.text = "Постройка готова."
+		elif Rules.is_road(cell):
+			status.text = "Эта клетка занята дорогой."
 		elif cell == Rules.HQ or rules.buildings.has(cell):
 			status.text = "Клетка занята."
 		else:
